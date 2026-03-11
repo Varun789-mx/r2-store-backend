@@ -3,11 +3,12 @@ dotenv.config();
 import express from "express"
 import { uptime } from "node:process";
 import { upload } from "./middleware/multer";
-import UploadOnCloudinary from "./utility/cloudnairy";
+// import UploadOnCloudinary from "./utility/cloudnairy";
 import fs from "fs";
 import { prisma } from "./utility/db";
 import { nanoid } from "nanoid";
 import path from "node:path";
+import { UploadFile } from "./utility/aws";
 
 const PORT = process.env.PORT || 5000;
 
@@ -33,31 +34,30 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                 error: "file not found in request",
             })
         }
-        let cloudinaryurl = await UploadOnCloudinary(file.path);
+        let cloudinaryurl = await UploadFile(file.path);
         if (!cloudinaryurl) {
-            return res.status(500).json({ error: "File upload failed"+cloudinaryurl });
+            return res.status(500).json({ error: "File upload failed" });
         }
-        const addToDb = await prisma.link.create({
-            data: {
-                original_url: cloudinaryurl,
-                short_url: nanoid(6),
-            },
-            select: {
-                original_url: true,
-                short_url: true,
-            }
-        });
-        if (!addToDb) {
-            return res.status(500).json({
-                error: "Failed to add asset to db",
-            })
-        }
+        // const addToDb = await prisma.link.create({
+        //     data: {
+        //         original_url: cloudinaryurl,
+        //         short_url: nanoid(6),
+        //     },
+        //     select: {
+        //         original_url: true,
+        //         short_url: true,
+        //     }
+        // });
+        // if (!addToDb) {
+        //     return res.status(500).json({
+        //         error: "Failed to add asset to db",
+        //     })
+        // }
         fs.unlinkSync(file.path);
         return res.status(200).json({
             success: true,
-            short_url: addToDb.short_url,
+            // short_url: addToDb.short_url,
         })
-        return res.status(200).json({ success: true, });
     } catch (error) {
         return res.status(500).json({ error: "Internal server error" })
     }
@@ -89,22 +89,20 @@ app.get("/download", async (req, res) => {
         if (!cloudnairyResponse.ok || !cloudnairyResponse.body) {
             return res.status(500).json({ error: "Failed to fetch the asset" })
         }
-        const filename = path.basename(record?.original_url.split("?")[0]);
+        const filename = path.basename(record?.original_url);
 
         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
         res.setHeader("Content-Type", cloudnairyResponse.headers.get("content-type") || "application/octet-stream");
 
-        // Update download count
         await prisma.link.updateMany({
             where: { short_url: short_id },
             data: { downloads: { increment: 1 } }
         })
-        // Pipe the Web ReadableStream to Node response
         const { Readable } = await import("stream");
         Readable.fromWeb(cloudnairyResponse.body as any).pipe(res);
     } catch (error) {
         return res.status(500).json({
-            error: "Interal server ecrror" + error
+            error: "Interal server error" + error
         })
     }
 })
