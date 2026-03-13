@@ -1,6 +1,7 @@
-import { ListBucketsCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { ListBucketsCommand, S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage"
 import path from "node:path";
-import fs from "fs";
+import { createReadStream } from "node:fs";
 
 const S3 = new S3Client({
     region: 'auto',
@@ -25,17 +26,21 @@ function getContentType(fileName: string) {
 
 export const UploadFile = async (localfilePath: string, destinationKey?: string) => {
     const fileName = path.basename(localfilePath)
-    const fileBuffer = fs.readFileSync(localfilePath);
     const contentType = getContentType(fileName);
-
     const key = destinationKey ?? fileName;
-    const command = new PutObjectCommand({
-        Bucket: "bucket1",
-        Key: key,
-        Body: fileBuffer,
-        ContentType: contentType,
+
+
+    const upload = new Upload({
+        client: S3,
+        params: {
+            Bucket: "bucket1",
+            Key: key,
+            Body: createReadStream(localfilePath),
+            ContentType: contentType,
+        },
+        partSize: 1024 * 1024 * 10
     });
-    const result = await S3.send(command);
+    const result = await upload.done();
     console.log(`File upload successfull ${fileName}`)
     return result;
 }
