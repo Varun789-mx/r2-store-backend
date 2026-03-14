@@ -5,7 +5,7 @@ import fs from "fs";
 import { prisma } from "./utils/db";
 import { nanoid } from "nanoid";
 import path from "node:path";
-import { UploadFile } from "./utils/aws";
+import { GetUrl, UploadFile } from "./utils/aws";
 
 const PORT = process.env.PORT || 5000;
 
@@ -53,7 +53,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         fs.unlinkSync(file.path);
         return res.status(200).json({
             success: true,
-            short_url: `${process.env.BACKEND_URL}/${addToDb.short_url}`,
+            short_url: `${process.env.BACKEND_URL}/download/?short_id=${addToDb.short_url}`,
         });
     } catch (error) {
         return res.status(500).json({ error: "Internal server error" });
@@ -83,8 +83,10 @@ app.get("/download", async (req, res) => {
                 error: "assest doesn't exist",
             });
         }
-        const cloudnairyResponse = await fetch(record.key);
-        if (!cloudnairyResponse.ok || !cloudnairyResponse.body) {
+        const StorageURl = await GetUrl(record.key);
+        console.log(StorageURl, "URL");
+        const cloudResponse = await fetch(StorageURl);
+        if (!cloudResponse.ok || !cloudResponse.body) {
             return res.status(500).json({ error: "Failed to fetch the asset" });
         }
         const filename = path.basename(record?.key);
@@ -92,16 +94,16 @@ app.get("/download", async (req, res) => {
         res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
         res.setHeader(
             "Content-Type",
-            cloudnairyResponse.headers.get("content-type") ||
+            cloudResponse.headers.get("content-type") ||
             "application/octet-stream",
         );
 
-        await prisma.link.updateMany({
+        await prisma.asset.updateMany({
             where: { short_url: short_id },
             data: { downloads: { increment: 1 } },
         });
         const { Readable } = await import("stream");
-        Readable.fromWeb(cloudnairyResponse.body as any).pipe(res);
+        Readable.fromWeb(cloudResponse.body as any).pipe(res);
     } catch (error) {
         return res.status(500).json({
             error: "Interal server error" + error,

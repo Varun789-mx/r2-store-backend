@@ -1,7 +1,9 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage"
 import path from "node:path";
 import { createReadStream } from "node:fs";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import type { Url } from "node:url";
 
 const S3 = new S3Client({
     region: 'auto',
@@ -23,6 +25,13 @@ function getContentType(fileName: string) {
     };
     return mimeTypes[ext] ?? "application/octet-stream";
 }
+
+export const GetUrl = async (ImageKey: string) => {
+    return getSignedUrl(S3,
+        new GetObjectCommand({ Bucket: "bucket1", Key: ImageKey }), { expiresIn: 3600 }
+    )
+}
+
 
 export const UploadFile = async (localfilePath: string, destinationKey?: string) => {
     const fileName = path.basename(localfilePath)
