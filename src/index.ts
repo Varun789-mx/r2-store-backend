@@ -2,7 +2,7 @@ import express from "express";
 import { uptime } from "node:process";
 import UploadRoute from "./routes/upload"
 import DownloadRoute from "./routes/download";
-import { requireAuth } from "./middleware/auth";
+import Getlinks from "./routes/getlinks"
 import cors from "cors";
 import { prisma } from "./utils/db";
 import cookieparser from "cookie-parser";
@@ -12,7 +12,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:5173', // Must match your frontend origin exactly
+    origin: 'http://localhost:5173',
     credentials: true,
 }))
 app.use(cookieparser())
@@ -64,9 +64,11 @@ app.use(async (req, res, next) => {
 })
 app.use("/api", UploadRoute);
 app.use("/api", DownloadRoute);
+app.use("/api", Getlinks);
 
 
 
 app.listen(PORT, () => {
     console.log(`Server is listening on http://localhost:${PORT}`);
 });
+    
