@@ -27,6 +27,7 @@ app.get("/health", (req, res) => {
 });
 app.use(async (req, res, next) => {
     try {
+        if (req.path === "/health") return next();
         let userId = req.cookies?.anon_id;
         if (!userId) {
             userId = crypto.randomUUID()
@@ -41,7 +42,8 @@ app.use(async (req, res, next) => {
                 sameSite: "none",
                 secure: true
             })
-            return res.json({ message: "New user created succesfully" })
+             req.userId = userId;
+            return next();
         } else {
             const userExists = await prisma.user.findUnique({
                 where: {
