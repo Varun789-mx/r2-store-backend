@@ -23,7 +23,7 @@ router.get('/getlinks', async (req, res) => {
                 short_url: true,
                 downloads: true,
             }, take: 7, orderBy: {
-                timeStamp: "asc"
+                timeStamp: 'desc'
             }
         })
         if (!Getlinks) {
