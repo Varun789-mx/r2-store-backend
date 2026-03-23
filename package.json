@@ -9,7 +9,7 @@
     "migrate:dev": "bun prisma migrate dev",
     "migrate:prod": "bun prisma migrate deploy",
     "start": "bun run dist/index.js",
-    "start:prod": "bun prisma migrate deploy && bun run dist/index.js"
+    "start:prod": "bun prisma migrate deploy && ls"
   },
   "devDependencies": {
     "@types/bun": "latest",
