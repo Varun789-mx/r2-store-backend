@@ -2,7 +2,7 @@
 
 The REST API backend for **R2-Store**, a simple media sharing and cloud storage application. Built with Express 5, Prisma, and Cloudflare R2 — running natively on Bun.
 
-> 🔗 Frontend repo: [driveapp-frontend](https://github.com/Varun789-mx/driveapp-frontend) · Live at [r2-store.vercel.app](https://r2-store.vercel.app)
+> 🔗 Frontend repo: [r2store-frontend](https://github.com/Varun789-mx/r2store-frontend) · Live at [r2-store.vercel.app](https://r2-store.vercel.app)
 
 ---
 
@@ -35,7 +35,7 @@ The REST API backend for **R2-Store**, a simple media sharing and cloud storage 
 
 ## Project Structure
 ```
-Driveapp/
+r2store/
 ├── prisma/               # Prisma schema and migrations
 ├── public/
 │   └── temp/             # Temporary upload staging directory
@@ -60,8 +60,8 @@ Driveapp/
 
 ### Installation
 ```bash
-git clone https://github.com/Varun789-mx/Driveapp.git
-cd Driveapp
+git clone https://github.com/Varun789-mx/r2store.git
+cd r2store
 bun install
 ```
 
@@ -149,7 +149,7 @@ Make sure all environment variables are set in your hosting environment.
 
 ## Related
 
-- 🖥️ Frontend: [driveapp-frontend](https://github.com/Varun789-mx/driveapp-frontend)
+- 🖥️ Frontend: [r2store-frontend](https://github.com/Varun789-mx/r2store-frontend)
 - ☁️ [Cloudflare R2 Docs](https://developers.cloudflare.com/r2/)
 - 🗄️ [Prisma Docs](https://www.prisma.io/docs)
 
