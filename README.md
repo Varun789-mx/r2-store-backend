@@ -1,4 +1,4 @@
-# Driveapp — Backend
+# R2-Store — Backend
 
 The REST API backend for **R2-Store**, a simple media sharing and cloud storage application. Built with Express 5, Prisma, and Cloudflare R2 — running natively on Bun.
 
